@@ -1,0 +1,19 @@
+
+/**/
+#maincontent{
+    width: 1002px;
+    margin: auto;    
+}
+/**/
+#Screen {    
+    border: 1px solid blue;  
+    margin-top: 5px;
+}
+/**/
+#button{
+    width: 200px;
+    height: 50px;
+    background-color: red;
+    margin: auto;
+    color: white;
+}

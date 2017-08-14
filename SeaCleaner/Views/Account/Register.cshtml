@@ -1,0 +1,33 @@
+﻿@model SeaCleaner.ViewModels.RegisterViewModel
+@{ 
+    ViewData["Title"] = "Регистрация";
+}
+<h2>Регистрация</h2>
+<form method="post" asp-action="Register" asp-controller="Account">
+    <div asp-validation-summary="ModelOnly"></div>
+    <div>
+        <label asp-for="Login"></label><br />
+        <input asp-for="Login" />
+        <span asp-validation-for="Login"></span>
+    </div>
+    <div>
+        <label asp-for="Email"></label><br />
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label><br />
+        <input asp-for="Password" />
+        <span asp-validation-for="Password"></span>        
+    </div>
+    <div>
+        <label asp-for="ConfirmPassword"></label><br />
+        <input asp-for="ConfirmPassword" />
+        <span asp-validation-for="ConfirmPassword"></span>
+    </div>
+    <div>
+        <input type="submit" value="Регистрация" class="btn btn-default"/>
+    </div>
+</form>
+
+<a asp-action="Index" asp-controller="Home" class="btn">Вернуться на главную</a>
