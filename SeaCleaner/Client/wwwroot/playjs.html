@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Play!</title>
+    <script src="/js/ImageSet.js"></script>
+    <script src="/js/Sprite.js"></script>
+    <script src="/js/Waves.js"></script>
+    <script src="/js/Trash.js"></script>
+    <script src="/js/Dolphin.js"></script>
+    <script src="/js/Screw.js"></script>
+    <script src="/js/Ship.js"></script>
+    <script src="/js/Arrow.js"></script>
+    <script src="/js/Hug.js"></script>
+    <script src="/js/Game.js"></script>
+    <script src="/js/script.js"></script>
+</head>
+<body style="background-color:aquamarine">
+    <table>
+        <tbody>
+            <tr>
+                <td width="1000px">
+                    <div id="maincontent">
+                        <h3 id="lblLoading"><b>Loading...</b></h3>
+                        <div id="container" style="display:none"><canvas id="Screen" style="border:1px solid blue" width="1000" height="700" OnClick="Start();"></canvas></div>
+                    </div>
+                </td>
+                <td style="vertical-align:top">
+                    <div style="float:left; margin-left:20px; margin-top:20px;border:1px solid #0094ff;">
+                        <table style="margin:10px;">
+                            <tbody>
+                                <tr>
+                                    <td width="200px">Осталось мусора в воде:</td>
+                                    <td><span id="lblTrashesCount"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Плавает дельфинов:</td>
+                                    <td><span id="lblDolphinsCount"></span></td>
+                                </tr>
+                                <tr>
+                                    <td>Время игры:</td>
+                                    <td><span id="lblGameTime"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table style="margin:10px;">
+                            <tbody>
+                                <tr>
+                                    <td width="150px"><b>p</b></td>
+                                    <td>Пауза</td>
+                                </tr>
+                                <tr>
+                                    <td><b>&lArr; &rArr;</b></td>
+                                    <td>Перемещение корабля влево и вправо</td>
+                                </tr>
+                                <tr>
+                                    <td><b>&dArr; &uArr;</b></td>
+                                    <td>Погружение / поднятие захватного механизма</td>
+                                </tr>
+                                <tr>
+                                    <td><b>(Spase)</b></td>
+                                    <td>Захват / освобождение мусора</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="color:forestgreen">Чтобы вытащить мусор, наведите на него захватный механизм (&lArr;, &rArr;, &dArr;, &uArr;), захватите его (Space), и поднимите его как можно ближе к поверхности</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

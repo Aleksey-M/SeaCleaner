@@ -1,0 +1,314 @@
+﻿@page "/"
+
+@using SeaCleaner.Shared
+@using SeaCleaner.Client.Game 
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@if (_gameOpened)
+{
+    <table>
+        <tbody style="vertical-align:top">
+            <tr>
+                <td width="1000px">
+                    <div id="maincontent">
+                        <h3 style="@(_gameInitialized ? "display:none":"")">
+                            <b>Loading...</b>
+                        </h3>
+                        <div id="container" style="@(_gameInitialized ? "":"display:none")">
+                            <canvas id="screen" style="border:1px solid blue" width="1000" height="700" @onclick="async _ => await StartGame()"></canvas>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div style="float:left; margin-left:20px; margin-top:20px;border:1px solid #0094ff;">
+                        <table style="margin:10px;">
+                            <tbody>
+                                <tr style="margin-bottom:10px">
+                                    <td width="200px">Мусор в воде:</td>
+                                    <td><span>@_trashesCount</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Живые дельфины:</td>
+                                    <td><span>@_dolphinsCount</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <table class="table table-sm table-striped">
+                            <tbody>
+                                <tr>
+                                    <td><b>p</b></td>
+                                    <td>Пауза</td>
+                                </tr>
+                                <tr>
+                                    <td><b>&lArr; &rArr;</b></td>
+                                    <td>Перемещение корабля влево и вправо</td>
+                                </tr>
+                                <tr>
+                                    <td><b>&dArr; &uArr;</b></td>
+                                    <td>Погружение / поднятие захватного механизма</td>
+                                </tr>
+                                <tr>
+                                    <td><b>(Spase)</b></td>
+                                    <td>Захват / освобождение мусора</td>
+                                </tr>
+                                <tr style="padding:7px;">
+                                    <td colspan="2" style="color:forestgreen">Чтобы вытащить мусор, наведите на него захватный механизм (&lArr;, &rArr;, &dArr;, &uArr;), захватите его (Space), и поднимите его как можно ближе к поверхности</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="row">
+        <div class="alert alert-info col-md-12">
+            <div>
+                <h2 style="float:left">Игра <strong>Sea Cleaner</strong> </h2>
+                <div style="float:right">
+                    @if (_currentGamer != null)
+                    {
+                        <div style="clear:both">
+                            <h4 style="color:green;display:inline-block">@_currentGamer.Login</h4>
+                            <button type="button" class="btn btn-danger btn-sm" @onclick="InitGame">Играть</button>
+                        </div>
+                    }
+                    else
+                    {
+                        if (_loginFormDisplayed)
+                        {
+                            <EditForm Model="_loginDto" OnValidSubmit="Login">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+                                <div class="form-inline">
+                                    <InputText @bind-Value="_loginDto.Login" class="form-control-sm" placeholder="Логин"></InputText>
+                                    <InputText @bind-Value="_loginDto.Password" type="password" class="form-control-sm" placeholder="Пароль"></InputText>
+                                    <button type="submit" class="btn btn-sm btn-primary">Вход</button>
+                                </div>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            <EditForm Model="_registerDto" OnValidSubmit="Register">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+                                <div class="form-inline">
+                                    <InputText @bind-Value="_registerDto.Login" class="form-control-sm" placeholder="Логин"></InputText>
+                                    <InputText @bind-Value="_registerDto.Password" type="password" class="form-control-sm" placeholder="Пароль"></InputText>
+                                    <InputText @bind-Value="_registerDto.ConfirmPasword" type="password" class="form-control-sm" placeholder="Подтвердить пароль"></InputText>
+                                    <button type="submit" class="btn btn-sm btn-primary">Регистрация</button>
+                                </div>
+                            </EditForm>
+                        }
+                    }
+                </div>
+                @if (_currentGamer == null)
+                {
+                    <div class="col-md-12" style="clear:both">
+                        <button type="button" class="btn btn-sm btn-link" style="float:right" @onclick="ToggleLoginForm">@(_loginFormDisplayed ? "Регистрация" : "Вход")</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-12" style="clear:both">
+                        <button type="button" class="btn btn-sm btn-link" style="float:right" @onclick="Logout">Выйти</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-7">
+            <h2>Легенда</h2>
+            <p>
+                Ежегодно в Мировой океан сбрасываются сотни тонн мусора. Он плавает на поверхности и в толще воды на разной глубине.
+                Морские животные очень часто страдают от этого. Многие из них гибнут.
+            </p>
+            <p>
+                Вам предстоит принять управление специальным кораблем с захватывающим механизмом, который позволит Вам вытаскивать мусор из океана.
+                Этим вы спасете многих морских существ, но не мешкайте! Упущенное время может дорого стоить. И не забывайте, что сам подъемный
+                механизм тоже может поранить животных.
+            </p>
+            <h2>Управление</h2>
+            <table class="table table-striped">
+                <tbody>
+                    <tr>
+                        <td width="150px"><b>p</b></td>
+                        <td>Пауза</td>
+                    </tr>
+                    <tr>
+                        <td><b>&lArr; &rArr;</b></td>
+                        <td>Перемещение корабля влево и вправо</td>
+                    </tr>
+                    <tr>
+                        <td><b>&dArr; &uArr;</b></td>
+                        <td>Погружение / поднятие захватного механизма</td>
+                    </tr>
+                    <tr>
+                        <td><b>(Spase)</b></td>
+                        <td>Захват / освобождение мусора</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">Чтобы вытащить мусор, наведите на него захватный механизм (&lArr;, &rArr;, &dArr;, &uArr;), захватите его (Space), и поднимите его как можно ближе к поверхности</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-5">
+            <h2>Лучшие результаты</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <td><span class="oi oi-badge" style="color:orange"></span></td>
+                        <td>Игрок</td>
+                        <td>Спасено</td>
+                        <td>В&nbsp;игре</td>
+                        <td>Дата игры</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in (_ratingTable?.ResultsList ?? Enumerable.Empty<GameResultsRow>()).Select((value, i) => new { i, value }))
+                    {
+                        <tr style="@(_currentGamer?.Id == row.value.GamerId ? "font-weight:bold" : "")">
+                            <td>@(row.i + 1)</td>
+                            <td>@row.value.GamerName</td>
+                            <td>@row.value.SavedDolphins</td>
+                            <td>@(TimeSpan.FromSeconds(row.value.GameDuration).Minutes):@(TimeSpan.FromSeconds(row.value.GameDuration).Seconds)</td>
+                            <td>@row.value.GameDate.ToString("yyyy.MM.dd") @row.value.GameDate.ToString("hh:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code{
+
+    private bool _loginFormDisplayed = true;
+
+    private readonly LogInDto _loginDto = new LogInDto();
+    private readonly RegisterDto _registerDto = new RegisterDto();
+    private GamerDto _currentGamer;
+
+    public void ToggleLoginForm()
+    {
+        _loginFormDisplayed = !_loginFormDisplayed;
+        _loginDto.Clear();
+        _registerDto.Clear();
+    }
+
+    private async Task Login()
+    {
+        var response = await Http.PostAsJsonAsync<LogInDto>("api/login", _loginDto);
+        var respContent = await response.Content.ReadAsStringAsync();
+        var respObj = Newtonsoft.Json.JsonConvert.DeserializeObject<LoginActionResult>(respContent); //System.Text.Json.JsonSerializer.Deserialize<LoginActionResult>(respContent);
+
+        if (response.IsSuccessStatusCode && respObj.Gamer != null)
+        {
+            _currentGamer = respObj.Gamer;
+            await JSRuntime.InvokeVoidAsync("updateLinkToJsGame", _currentGamer.Id);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("window.alert", respObj.Message);
+        }
+        _loginDto.Clear();
+    }
+
+    private async Task Register()
+    {
+        var response = await Http.PostAsJsonAsync<RegisterDto>("api/register", _registerDto);
+        var respContent = await response.Content.ReadAsStringAsync();
+        var respObj = Newtonsoft.Json.JsonConvert.DeserializeObject<LoginActionResult>(respContent);
+
+        if (response.IsSuccessStatusCode && respObj.Gamer != null)
+        {
+            _currentGamer = respObj.Gamer;
+            await JSRuntime.InvokeVoidAsync("updateLinkToJsGame", _currentGamer.Id);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("window.alert", respObj.Message);
+        }
+        _registerDto.Clear();
+    }
+
+    private async Task Logout()
+    {
+        _currentGamer = null;
+        await JSRuntime.InvokeVoidAsync("updateLinkToJsGame", string.Empty);
+    }
+
+    private RatingTable _ratingTable;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ratingTable = await Http.GetFromJsonAsync<RatingTable>("api/rating");
+    }
+
+    private bool _gameOpened = false;
+    private bool _gameInitialized = false;
+    private bool _gameStarted = false;
+    private Game _game;
+
+    private async Task InitGame()
+    {
+        _dolphinsCount = 4;
+        _trashesCount = 10;
+
+        _gameOpened = true;
+        _game = new Game(JSRuntime, "screen");
+        await _game.LoadResources();
+        await _game.Initialize();
+        _gameInitialized = true;
+    }
+
+    private int _dolphinsCount = 4;
+    private int _trashesCount = 10;
+
+    private async ValueTask StartGame()
+    {
+        if (!_gameStarted)
+        {
+            await _game.StartGame(
+                d => {
+                    _dolphinsCount = d;
+                    StateHasChanged();
+                },
+                t =>
+                {
+                    _trashesCount = t;
+                    StateHasChanged();
+                },
+                async (v, d, s) =>
+                {
+                    var gameResult = new AddGameResultDto
+                    {
+                        GamerId = _currentGamer.Id,
+                        SavedDolphins = d,
+                        Victory = v,
+                        Seconds = s
+                    };
+                    // нужно будет проверить что за баг
+                    await Http.PostAsJsonAsync($@"api/win?victory={v}&gamerId={_currentGamer.Id}&SavedDolphins={d}&Seconds={s}", gameResult);
+                    _ratingTable = await Http.GetFromJsonAsync<RatingTable>("api/rating");
+                },
+                () =>
+                {
+                    _gameInitialized = false;
+                    _gameOpened = false;
+                    _gameStarted = false;
+                    StateHasChanged();
+                });
+            _gameStarted = true;
+        }
+    }
+}
